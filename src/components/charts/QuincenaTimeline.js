@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart } from 'recharts';
+import { BarChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart } from 'recharts';
 import { fmtShort, fmt } from '../../utils/formatters';
 import { statusColor } from '../../utils/formatters';
 import { ChartPanel } from '../ui/ChartPanel';
