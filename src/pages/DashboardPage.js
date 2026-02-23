@@ -53,7 +53,6 @@ export const DashboardPage = () => {
 
   // Safely access data with fallbacks
   const quinceналData      = data?.quinceналData      || [];
-  const monthlyData        = data?.monthlyData        || [];
   const categoryData       = data?.categoryData       || [];
   const necesidadData      = data?.necesidadData      || [];
   const topEstablecimientos= data?.topEstablecimientos|| [];
