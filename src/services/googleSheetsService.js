@@ -257,11 +257,14 @@ export const processDashboardData = (budgetRows, expenseRows) => {
     .sort((a, b) => b.total - a.total)
     .slice(0, 8);
 
+  // ── Todas las transacciones (para filtrado cliente) ───────────────────────────
+  const allTransactions = [...expenses]
+    .filter(r => r._fecha && r._monto > 0)
+    .sort((a, b) => new Date(b._fecha) - new Date(a._fecha));
+
   // ── Transacciones recientes ───────────────────────────────────────────────────
-  const recentTransactions = [...expenses]
-    .filter(r => r._fecha)
-    .sort((a, b) => new Date(b._fecha) - new Date(a._fecha))
-    .slice(0, 20)
+  const recentTransactions = allTransactions
+    .slice(0, 50)
     .map((r, i) => ({
       id:               i,
       fecha:            r._fecha,
@@ -291,6 +294,99 @@ export const processDashboardData = (budgetRows, expenseRows) => {
     donutData,
     currentQ,
     currentQData,
+    allTransactions,
+    allBudgets: budgets,
+  };
+};
+
+// ─── FILTRADO POR PERÍODO ──────────────────────────────────────────────────────
+// period: { type: 'all' | 'month' | 'quincena', monthIdx?: number, value?: string }
+
+export const deriveFilteredStats = (allTransactions, allBudgets, quinceналData, period) => {
+  let filteredTx      = allTransactions;
+  let filteredBudgets = allBudgets;
+
+  if (period.type === 'quincena') {
+    filteredTx      = allTransactions.filter(r => r._quincena === period.value);
+    filteredBudgets = allBudgets.filter(r => r._quincena === period.value);
+  } else if (period.type === 'month') {
+    const monthQs = quinceналData
+      .filter(q => q.monthIdx === period.monthIdx)
+      .map(q => q.q);
+    filteredTx      = allTransactions.filter(r => monthQs.includes(r._quincena));
+    filteredBudgets = allBudgets.filter(r => monthQs.includes(r._quincena));
+  }
+
+  const totalBudget   = filteredBudgets.reduce((s, r) => s + r._presupuesto, 0);
+  const totalExpenses = filteredTx.reduce((s, r) => s + r._monto, 0);
+  const remaining     = totalBudget - totalExpenses;
+  const executionRate = totalBudget > 0 ? (totalExpenses / totalBudget) * 100 : 0;
+
+  // ── Categorías ──────────────────────────────────────────────────────────────
+  const catMap = {};
+  filteredBudgets.forEach(r => {
+    const cat = r._categoria;
+    if (!catMap[cat]) catMap[cat] = { budget: 0, expenses: 0, items: [] };
+    catMap[cat].budget += r._presupuesto;
+  });
+  filteredTx.forEach(r => {
+    const cat = r._categoria;
+    if (!catMap[cat]) catMap[cat] = { budget: 0, expenses: 0, items: [] };
+    catMap[cat].expenses += r._monto;
+    catMap[cat].items.push(r);
+  });
+  const categoryData = Object.entries(catMap)
+    .map(([name, d]) => ({
+      name,
+      presupuesto: d.budget,
+      gasto:       d.expenses,
+      saldo:       d.budget - d.expenses,
+      ejecucion:   d.budget > 0 ? Math.round((d.expenses / d.budget) * 100) : 0,
+      items:       d.items,
+      status:      d.expenses > d.budget ? 'over' : d.expenses / (d.budget || 1) > 0.85 ? 'warning' : 'ok',
+    }))
+    .sort((a, b) => b.presupuesto - a.presupuesto);
+
+  // ── Necesidad ───────────────────────────────────────────────────────────────
+  const necMap = {};
+  filteredTx.forEach(r => {
+    const nec = r._necesidad || 'Moderado';
+    if (!necMap[nec]) necMap[nec] = { count: 0, total: 0 };
+    necMap[nec].count++;
+    necMap[nec].total += r._monto;
+  });
+  const necesidadData = Object.entries(necMap)
+    .map(([name, d]) => ({
+      name, value: d.total, count: d.count,
+      color: NECESIDAD_CONFIG[name]?.color || '#8892a4',
+      icon:  NECESIDAD_CONFIG[name]?.icon  || '?',
+    }))
+    .sort((a, b) => (NECESIDAD_CONFIG[b.name]?.score || 0) - (NECESIDAD_CONFIG[a.name]?.score || 0));
+
+  // ── Top establecimientos ────────────────────────────────────────────────────
+  const estMap = {};
+  filteredTx.forEach(r => {
+    const est = r._establecimiento;
+    if (!estMap[est]) estMap[est] = { total: 0, count: 0, categoria: r._categoria };
+    estMap[est].total += r._monto;
+    estMap[est].count++;
+  });
+  const topEstablecimientos = Object.entries(estMap)
+    .map(([name, d]) => ({ name, ...d }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 8);
+
+  const donutData = categoryData.filter(c => c.gasto > 0).map(c => ({ name: c.name, value: c.gasto }));
+
+  const recentTransactions = filteredTx.map((r, i) => ({
+    id: i, fecha: r._fecha, establecimiento: r._establecimiento,
+    monto: r._monto, categoria: r._categoria, necesidad: r._necesidad,
+    descripcion: r._descripcion, quincena: r._quincena,
+  }));
+
+  return {
+    summary: { totalBudget, totalExpenses, remaining, executionRate },
+    categoryData, necesidadData, topEstablecimientos, donutData, recentTransactions,
   };
 };
 
