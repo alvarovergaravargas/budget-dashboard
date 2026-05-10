@@ -16,15 +16,12 @@ import { DollarSign, TrendingDown, TrendingUp, AlertTriangle, Database } from 'l
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', minimumFractionDigits:2 }).format(n || 0);
 
-const GRID = (cols, gap = 16) => ({ display:'grid', gridTemplateColumns:cols, gap });
-
 const SectionLabel = ({ children }) => (
   <div style={{ fontFamily:'var(--font-display)', fontSize:13, fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--text-muted)', marginBottom:4, paddingLeft:2 }}>
     {children}
   </div>
 );
 
-// Shown when a section has no data yet
 const EmptyState = ({ message = 'Sin datos aún' }) => (
   <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'40px 20px', background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--radius-lg)', gap:12 }}>
     <Database size={28} color="var(--text-muted)" />
@@ -32,7 +29,6 @@ const EmptyState = ({ message = 'Sin datos aún' }) => (
   </div>
 );
 
-// Safe wrapper — catches render errors in charts
 class ChartErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false }; }
   static getDerivedStateFromError() { return { hasError: true }; }
@@ -42,16 +38,13 @@ class ChartErrorBoundary extends React.Component {
   }
 }
 
-const Safe = ({ children, fallback }) => (
-  <ChartErrorBoundary>
-    {children}
-  </ChartErrorBoundary>
+const Safe = ({ children }) => (
+  <ChartErrorBoundary>{children}</ChartErrorBoundary>
 );
 
 export const DashboardPage = () => {
   const { data, loading, error, isDemo, lastSync, refresh } = useDashboard();
 
-  // Safely access data with fallbacks
   const quinceналData      = data?.quinceналData      || [];
   const categoryData       = data?.categoryData       || [];
   const necesidadData      = data?.necesidadData      || [];
@@ -68,12 +61,12 @@ export const DashboardPage = () => {
       {error   && <ErrorState message={error} onRetry={refresh} />}
 
       {!loading && !error && data && (
-        <main style={{ padding:'28px 32px', display:'flex', flexDirection:'column', gap:24, maxWidth:1600, margin:'0 auto' }}>
+        <main className="dash-main">
 
           {/* ══ KPIs ══════════════════════════════════════════════════════════ */}
           <section>
             <SectionLabel>Resumen Anual</SectionLabel>
-            <div style={GRID('repeat(4,1fr)')}>
+            <div className="grid-kpi">
               <KPICard label="Presupuesto Total"   value={fmt(summary.totalBudget)}   sub="Suma de todas las quincenas"         icon={DollarSign}    color="var(--blue)"   />
               <KPICard label="Gasto Ejecutado"      value={fmt(summary.totalExpenses)} sub={`${Math.round(summary.executionRate)}% del presupuesto`} icon={TrendingDown} color="var(--accent)" />
               <KPICard label="Saldo Disponible"     value={fmt(summary.remaining)}     sub={summary.remaining < 0 ? '⚠ Sobre presupuesto' : 'Disponible para gastar'} icon={TrendingUp} color={summary.remaining < 0 ? 'var(--danger)' : '#a78bfa'} />
@@ -84,7 +77,7 @@ export const DashboardPage = () => {
           {/* ══ QUINCENA ACTUAL + GAUGE ═══════════════════════════════════════ */}
           <section>
             <SectionLabel>Quincena en Curso</SectionLabel>
-            <div style={GRID('1fr 320px')}>
+            <div className="grid-quincena">
               <Safe><QuincenaKPI currentQ={data.currentQ} currentQData={data.currentQData} /></Safe>
               <Safe><ExecutionGauge rate={summary.executionRate} remaining={summary.remaining} total={summary.totalBudget} /></Safe>
             </div>
@@ -102,7 +95,7 @@ export const DashboardPage = () => {
           {/* ══ NECESIDAD + ESTABLECIMIENTOS ══════════════════════════════════ */}
           <section>
             <SectionLabel>Análisis de Comportamiento</SectionLabel>
-            <div style={GRID('1fr 1fr')}>
+            <div className="grid-halves">
               {necesidadData.length > 0
                 ? <Safe><NecesidadChart data={necesidadData} /></Safe>
                 : <EmptyState message="Sin gastos registrados aún" />
@@ -117,7 +110,7 @@ export const DashboardPage = () => {
           {/* ══ CATEGORÍAS + DONUT ════════════════════════════════════════════ */}
           <section>
             <SectionLabel>Distribución por Categoría</SectionLabel>
-            <div style={GRID('3fr 2fr')}>
+            <div className="grid-cat">
               {categoryData.length > 0
                 ? <Safe><CategoryTable data={categoryData} /></Safe>
                 : <EmptyState message="Sin categorías de presupuesto aún" />

@@ -2,6 +2,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell } from 'recharts';
 import { fmt, fmtShort } from '../../utils/formatters';
 import { ChartPanel } from '../ui/ChartPanel';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 
 const COLORS = ['#00e5a0','#3b82f6','#a78bfa','#f5a623','#ff4d6d','#34d399','#60a5fa','#c084fc'];
 
@@ -19,20 +20,26 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 export const EstablecimientoChart = ({ data = [] }) => {
+  const { isMobile, isTablet } = useBreakpoint();
   if (!data || data.length === 0) return null;
+
+  const yAxisWidth  = isMobile ? 80 : 100;
+  const chartHeight = isMobile ? 220 : 260;
+  const tickFontSize = isMobile ? 9 : 11;
+
   return (
-  <ChartPanel title="Top Establecimientos" subtitle="Dónde se concentra más el gasto">
-    <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={data} layout="vertical" barCategoryGap="20%">
-        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-        <XAxis type="number" tickFormatter={fmtShort} tick={{ fill:'var(--text-secondary)', fontFamily:'var(--font-mono)', fontSize:10 }} axisLine={false} tickLine={false} />
-        <YAxis type="category" dataKey="name" width={100} tick={{ fill:'var(--text-secondary)', fontFamily:'var(--font-body)', fontSize:11 }} axisLine={false} tickLine={false} />
-        <Tooltip content={<CustomTooltip />} cursor={{ fill:'rgba(255,255,255,0.02)' }} />
-        <Bar dataKey="total" name="Gasto total" radius={[0,5,5,0]}>
-          {data.map((_,i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  </ChartPanel>
+    <ChartPanel title="Top Establecimientos" subtitle="Dónde se concentra más el gasto">
+      <ResponsiveContainer width="100%" height={chartHeight}>
+        <BarChart data={data} layout="vertical" barCategoryGap="20%">
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+          <XAxis type="number" tickFormatter={fmtShort} tick={{ fill:'var(--text-secondary)', fontFamily:'var(--font-mono)', fontSize:10 }} axisLine={false} tickLine={false} />
+          <YAxis type="category" dataKey="name" width={yAxisWidth} tick={{ fill:'var(--text-secondary)', fontFamily:'var(--font-body)', fontSize:tickFontSize }} axisLine={false} tickLine={false} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill:'rgba(255,255,255,0.02)' }} />
+          <Bar dataKey="total" name="Gasto total" radius={[0,5,5,0]}>
+            {data.map((_,i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartPanel>
   );
 };

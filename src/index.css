@@ -44,6 +44,8 @@ html, body, #root {
   -webkit-font-smoothing: antialiased;
 }
 
+body { overflow-x: hidden; }
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
@@ -56,4 +58,94 @@ html, body, #root {
   border: 1px solid var(--border-accent) !important;
   border-radius: var(--radius-sm) !important;
   font-family: var(--font-body) !important;
+}
+
+/* ── Dashboard main layout ────────────────────────────────────── */
+.dash-main {
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-width: 0;
+}
+
+/* ── Responsive grids ─────────────────────────────────────────── */
+.grid-kpi {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.grid-halves {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.grid-quincena {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+}
+.grid-cat {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 16px;
+}
+
+/* Tablet breakpoint ≤ 1023px */
+@media (max-width: 1023px) {
+  .grid-quincena { grid-template-columns: 1fr; }
+  .grid-cat      { grid-template-columns: 1fr; }
+}
+
+/* Mobile breakpoint ≤ 639px */
+@media (max-width: 639px) {
+  .dash-main   { padding: 12px 14px; gap: 14px; }
+  .grid-kpi    { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .grid-halves { grid-template-columns: 1fr; }
+}
+
+/* ── Header ───────────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+@media (max-width: 639px) {
+  .app-header { padding: 10px 14px; }
+}
+
+/* ── KPI Card value — fluid font size ─────────────────────────── */
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 3.5vw, 32px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* ── ChartPanel ───────────────────────────────────────────────── */
+.chart-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (max-width: 639px) {
+  .chart-panel { padding: 14px; gap: 14px; }
 }

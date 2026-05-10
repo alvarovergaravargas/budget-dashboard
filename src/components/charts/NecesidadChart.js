@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Sector, BarChart, Bar, XAxis,
 import { fmt, fmtShort } from '../../utils/formatters';
 import { colorBg } from '../../utils/colorUtils';
 import { ChartPanel } from '../ui/ChartPanel';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 
 const NECESIDAD_ORDER = ['Necesario','Importante','Moderado','Prescindible'];
 
@@ -31,6 +32,8 @@ const CustomTooltip = ({ active, payload }) => {
 export const NecesidadChart = ({ data = [] }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [view, setView] = useState('donut');
+  const { isMobile } = useBreakpoint();
+
   const sorted = [...data].filter(d => d && d.value > 0).sort((a,b) => NECESIDAD_ORDER.indexOf(a.name) - NECESIDAD_ORDER.indexOf(b.name));
   const total = sorted.reduce((s,d) => s + d.value, 0);
   if (sorted.length === 0) return null;
@@ -42,6 +45,8 @@ export const NecesidadChart = ({ data = [] }) => {
     'Moderado':     'Conveniente pero prescindible',
     'Prescindible': 'Lujo o gasto evitable',
   };
+
+  const donutSize = isMobile ? 180 : 200;
 
   return (
     <ChartPanel
@@ -62,11 +67,16 @@ export const NecesidadChart = ({ data = [] }) => {
       }
     >
       {view === 'donut' ? (
-        <div style={{ display:'flex', gap:16, alignItems:'center' }}>
-          <div style={{ flex:'0 0 200px', height:200 }}>
+        <div style={{
+          display:'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap:16,
+          alignItems: isMobile ? 'stretch' : 'center',
+        }}>
+          <div style={{ flex: isMobile ? 'none' : '0 0 200px', height: donutSize, width: isMobile ? '100%' : undefined }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={sorted} cx="50%" cy="50%" innerRadius={60} outerRadius={88}
+                <Pie data={sorted} cx="50%" cy="50%" innerRadius={isMobile ? 54 : 60} outerRadius={isMobile ? 78 : 88}
                   dataKey="value" activeIndex={activeIdx} activeShape={ActiveShape}
                   onMouseEnter={(_,i) => setActiveIdx(i)}>
                   {sorted.map((d,i) => <Cell key={i} fill={d.color} stroke="none" />)}
@@ -74,17 +84,19 @@ export const NecesidadChart = ({ data = [] }) => {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div style={{ flex:1, display:'flex', flexDirection:'column', gap:10 }}>
+          <div style={{ flex:1, display:'flex', flexDirection:'column', gap:8 }}>
             {sorted.map((d,i) => (
               <div key={d.name}
                 style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 12px', borderRadius:10, cursor:'pointer', background: activeIdx===i ? 'var(--bg-hover)' : 'transparent', transition:'background 0.15s' }}
-                onMouseEnter={() => setActiveIdx(i)}>
+                onMouseEnter={() => setActiveIdx(i)}
+                onClick={() => setActiveIdx(i)}
+              >
                 <div style={{ width:28, height:28, borderRadius:8, background: colorBg(d.color, 0.18), border:`1px solid ${d.color}80`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, color:d.color, flexShrink:0 }}>{ICONS[d.name]||'?'}</div>
-                <div style={{ flex:1 }}>
+                <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:13, fontWeight:500, color:'var(--text-primary)' }}>{d.name}</div>
-                  <div style={{ fontSize:10, color:'var(--text-muted)' }}>{DESCS[d.name]}</div>
+                  {!isMobile && <div style={{ fontSize:10, color:'var(--text-muted)' }}>{DESCS[d.name]}</div>}
                 </div>
-                <div style={{ textAlign:'right' }}>
+                <div style={{ textAlign:'right', flexShrink:0 }}>
                   <div style={{ fontFamily:'var(--font-mono)', fontSize:12, color:'var(--text-primary)' }}>{fmt(d.value)}</div>
                   <div style={{ fontFamily:'var(--font-mono)', fontSize:10, color:'var(--text-muted)' }}>{total > 0 ? Math.round(d.value/total*100) : 0}%</div>
                 </div>
@@ -93,11 +105,11 @@ export const NecesidadChart = ({ data = [] }) => {
           </div>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={220}>
+        <ResponsiveContainer width="100%" height={isMobile ? 180 : 220}>
           <BarChart data={sorted} layout="vertical" barCategoryGap="25%">
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
             <XAxis type="number" tickFormatter={fmtShort} tick={{ fill:'var(--text-secondary)', fontFamily:'var(--font-mono)', fontSize:10 }} axisLine={false} tickLine={false} />
-            <YAxis type="category" dataKey="name" width={100} tick={{ fill:'var(--text-secondary)', fontFamily:'var(--font-body)', fontSize:12 }} axisLine={false} tickLine={false} />
+            <YAxis type="category" dataKey="name" width={isMobile ? 88 : 100} tick={{ fill:'var(--text-secondary)', fontFamily:'var(--font-body)', fontSize: isMobile ? 11 : 12 }} axisLine={false} tickLine={false} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill:'rgba(255,255,255,0.02)' }} />
             <Bar dataKey="value" name="Total gastado" radius={[0,4,4,0]}>
               {sorted.map((d,i) => <Cell key={i} fill={d.color} />)}

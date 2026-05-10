@@ -3,12 +3,13 @@ import { BarChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Resp
 import { fmtShort, fmt } from '../../utils/formatters';
 import { statusColor } from '../../utils/formatters';
 import { ChartPanel } from '../ui/ChartPanel';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   const p = payload[0]?.payload;
   return (
-    <div style={{ background:'var(--bg-panel)', border:'1px solid var(--border-accent)', borderRadius:12, padding:'14px 18px', fontFamily:'var(--font-body)', minWidth:200 }}>
+    <div style={{ background:'var(--bg-panel)', border:'1px solid var(--border-accent)', borderRadius:12, padding:'14px 18px', fontFamily:'var(--font-body)', minWidth:180 }}>
       <div style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:14, marginBottom:10, color:'var(--text-primary)' }}>{p?.q} · {label}</div>
       {payload.map(pl => (
         <div key={pl.name} style={{ display:'flex', justifyContent:'space-between', gap:20, fontSize:13, marginBottom:5 }}>
@@ -34,15 +35,15 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-const CustomTick = ({ x, y, payload, data }) => {
+const CustomTick = ({ x, y, payload, data, isMobile }) => {
   const item = data?.find(d => d.name === payload.value);
   return (
     <g transform={`translate(${x},${y})`}>
-      <text x={0} y={0} dy={14} textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-mono)" fontSize={9}>
+      <text x={0} y={0} dy={14} textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-mono)" fontSize={isMobile ? 8 : 9}>
         {item?.q || payload.value}
       </text>
       {item?.half === 1 && item?.month && (
-        <text x={0} y={0} dy={26} textAnchor="middle" fill="var(--text-muted)" fontFamily="var(--font-body)" fontSize={10}>
+        <text x={0} y={0} dy={isMobile ? 22 : 26} textAnchor="middle" fill="var(--text-muted)" fontFamily="var(--font-body)" fontSize={isMobile ? 8 : 10}>
           {item.month.substring(0,3)}
         </text>
       )}
@@ -52,8 +53,8 @@ const CustomTick = ({ x, y, payload, data }) => {
 
 export const QuincenaTimeline = ({ data: rawData = [] }) => {
   const [view, setView] = useState('bars');
+  const { isMobile, isTablet } = useBreakpoint();
 
-  // Sanitize — ensure all numeric fields are valid numbers
   const data = (rawData || [])
     .filter(d => d && typeof d === 'object')
     .map(d => ({
@@ -69,6 +70,11 @@ export const QuincenaTimeline = ({ data: rawData = [] }) => {
     .filter(d => d.name && (d.presupuesto > 0 || d.gasto > 0));
 
   if (data.length === 0) return null;
+
+  const chartHeight = isMobile ? 210 : isTablet ? 260 : 320;
+  // Show every 4th label on mobile, every 2nd on tablet, all on desktop
+  const xInterval = isMobile ? 3 : isTablet ? 1 : 0;
+  const yAxisWidth = isMobile ? 42 : 50;
 
   return (
     <ChartPanel
@@ -88,12 +94,12 @@ export const QuincenaTimeline = ({ data: rawData = [] }) => {
         </div>
       }
     >
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%" height={chartHeight}>
         {view === 'bars' ? (
           <BarChart data={data} barCategoryGap="25%" barGap={2}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="name" tick={<CustomTick data={data} />} axisLine={false} tickLine={false} height={36} interval={0} />
-            <YAxis tickFormatter={fmtShort} tick={{ fill:'var(--text-secondary)', fontFamily:'var(--font-mono)', fontSize:10 }} axisLine={false} tickLine={false} width={50} />
+            <XAxis dataKey="name" tick={<CustomTick data={data} isMobile={isMobile} />} axisLine={false} tickLine={false} height={36} interval={xInterval} />
+            <YAxis tickFormatter={fmtShort} tick={{ fill:'var(--text-secondary)', fontFamily:'var(--font-mono)', fontSize:10 }} axisLine={false} tickLine={false} width={yAxisWidth} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill:'rgba(255,255,255,0.02)' }} />
             <Legend wrapperStyle={{ fontFamily:'var(--font-body)', fontSize:12, paddingTop:12 }} />
             <Bar dataKey="presupuesto" name="Presupuesto" fill="var(--blue)"   radius={[3,3,0,0]} fillOpacity={0.7} />
@@ -112,8 +118,8 @@ export const QuincenaTimeline = ({ data: rawData = [] }) => {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="name" tick={<CustomTick data={data} />} axisLine={false} tickLine={false} height={36} interval={0} />
-            <YAxis tickFormatter={fmtShort} tick={{ fill:'var(--text-secondary)', fontFamily:'var(--font-mono)', fontSize:10 }} axisLine={false} tickLine={false} width={55} />
+            <XAxis dataKey="name" tick={<CustomTick data={data} isMobile={isMobile} />} axisLine={false} tickLine={false} height={36} interval={xInterval} />
+            <YAxis tickFormatter={fmtShort} tick={{ fill:'var(--text-secondary)', fontFamily:'var(--font-mono)', fontSize:10 }} axisLine={false} tickLine={false} width={yAxisWidth + 5} />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontFamily:'var(--font-body)', fontSize:12, paddingTop:12 }} />
             <Bar  dataKey="acumuladoP" name="Presupuesto acum." fill="url(#gAP)" stroke="#3b82f6" strokeWidth={1.5} radius={[3,3,0,0]} fillOpacity={0.6} />
