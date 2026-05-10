@@ -125,20 +125,6 @@ export const DashboardPage = () => {
             </div>
           </section>
 
-          {/* ══ INDICADORES DE CONSUMO ════════════════════════════════════════ */}
-          <section>
-            <SectionLabel>Indicadores de Consumo</SectionLabel>
-            <Safe>
-              <InsightsSection
-                quinceналData={quinceналData}
-                necesidadData={data?.necesidadData || []}
-                categoryData={data?.categoryData   || []}
-                summary={data?.summary             || {}}
-                allTransactions={data?.allTransactions || []}
-              />
-            </Safe>
-          </section>
-
           {/* ══ FILTRO DE PERÍODO ════════════════════════════════════════════ */}
           <section>
             <SectionLabel>
@@ -189,6 +175,20 @@ export const DashboardPage = () => {
                 : <EmptyState message="Sin gastos para mostrar distribución" />
               }
             </div>
+          </section>
+
+          {/* ══ INDICADORES DE CONSUMO ════════════════════════════════════════ */}
+          <section>
+            <SectionLabel>Indicadores de Consumo</SectionLabel>
+            <Safe>
+              <InsightsSection
+                quinceналData={quinceналData}
+                necesidadData={data?.necesidadData     || []}
+                categoryData={data?.categoryData       || []}
+                summary={data?.summary                 || {}}
+                allTransactions={data?.allTransactions || []}
+              />
+            </Safe>
           </section>
 
           {/* ══ TRAZABILIDAD ══════════════════════════════════════════════════ */}
