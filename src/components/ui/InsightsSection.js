@@ -3,39 +3,58 @@ import { fmt, fmtPct } from '../../utils/formatters';
 import { ChartPanel } from './ChartPanel';
 import { TrendingUp, TrendingDown, Minus, Award, AlertCircle, Zap, Target, Activity } from 'lucide-react';
 
-const Stat = ({ icon: Icon, label, value, sub, color = 'var(--accent)', highlight = false }) => (
-  <div style={{
-    display: 'flex', flexDirection: 'column', gap: 6,
-    padding: '14px 16px',
-    background: highlight ? `${color}10` : 'var(--bg-panel)',
-    borderRadius: 12,
-    border: `1px solid ${highlight ? color + '40' : 'var(--border)'}`,
-    flex: '1 1 150px',
-    minWidth: 0,
-  }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+const Stat = ({ icon: Icon, label, value, sub, color = 'var(--accent)', highlight = false, vertical = false }) => {
+  if (vertical) {
+    return (
       <div style={{
-        width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-        background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '9px 12px', borderRadius: 10,
+        background: highlight ? `${color}10` : 'var(--bg-panel)',
+        border: `1px solid ${highlight ? color + '40' : 'var(--border)'}`,
       }}>
-        <Icon size={14} color={color} />
+        <div style={{ width: 26, height: 26, borderRadius: 7, flexShrink: 0, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon size={12} color={color} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>{label}</div>
+          {sub && <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sub}</div>}
+        </div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color, flexShrink: 0 }}>{value}</div>
       </div>
-      <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-        {label}
-      </span>
-    </div>
-    <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color, lineHeight: 1, letterSpacing: '-0.02em' }}>
-      {value}
-    </div>
-    {sub && (
-      <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.3 }}>
-        {sub}
-      </div>
-    )}
-  </div>
-);
+    );
+  }
 
-export const InsightsSection = ({ quinceналData = [], necesidadData = [], categoryData = [], summary = {}, allTransactions = [] }) => {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', gap: 6,
+      padding: '14px 16px',
+      background: highlight ? `${color}10` : 'var(--bg-panel)',
+      borderRadius: 12,
+      border: `1px solid ${highlight ? color + '40' : 'var(--border)'}`,
+      flex: '1 1 150px',
+      minWidth: 0,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+        <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon size={14} color={color} />
+        </div>
+        <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+          {label}
+        </span>
+      </div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color, lineHeight: 1, letterSpacing: '-0.02em' }}>
+        {value}
+      </div>
+      {sub && (
+        <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.3 }}>
+          {sub}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const InsightsSection = ({ quinceналData = [], necesidadData = [], categoryData = [], summary = {}, allTransactions = [], vertical = false }) => {
   const quincenasConGasto = quinceналData.filter(q => q.gasto > 0);
   if (quincenasConGasto.length === 0) return null;
 
@@ -82,14 +101,20 @@ export const InsightsSection = ({ quinceналData = [], necesidadData = [], cat
     ? totalExpenses / allTransactions.length
     : 0;
 
+  const statProps = { vertical };
+  const listStyle = vertical
+    ? { display: 'flex', flexDirection: 'column', gap: 6 }
+    : { display: 'flex', gap: 10, flexWrap: 'wrap' };
+
   return (
     <ChartPanel
       title="Indicadores de Consumo"
       subtitle="Métricas derivadas de tus hábitos financieros — año completo"
     >
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+      <div style={listStyle}>
 
         <Stat
+          {...statProps}
           icon={Activity}
           label="Promedio quincenal"
           value={fmt(promedioQuincenal)}
@@ -98,6 +123,7 @@ export const InsightsSection = ({ quinceналData = [], necesidadData = [], cat
         />
 
         <Stat
+          {...statProps}
           icon={Award}
           label="Mejor quincena"
           value={mejorQ ? `${mejorQ.q}` : '—'}
@@ -107,6 +133,7 @@ export const InsightsSection = ({ quinceналData = [], necesidadData = [], cat
         />
 
         <Stat
+          {...statProps}
           icon={Target}
           label="Quincenas OK"
           value={`${qOK} / ${quincenasConGasto.length}`}
@@ -115,6 +142,7 @@ export const InsightsSection = ({ quinceналData = [], necesidadData = [], cat
         />
 
         <Stat
+          {...statProps}
           icon={AlertCircle}
           label="Gasto prescindible"
           value={`${pctPrescindible}%`}
@@ -124,6 +152,7 @@ export const InsightsSection = ({ quinceналData = [], necesidadData = [], cat
 
         {catExcedidas > 0 && (
           <Stat
+            {...statProps}
             icon={TrendingUp}
             label="Categ. excedidas"
             value={String(catExcedidas)}
@@ -135,6 +164,7 @@ export const InsightsSection = ({ quinceналData = [], necesidadData = [], cat
 
         {tendenciaPct !== null && (
           <Stat
+            {...statProps}
             icon={TendIcon}
             label="Tendencia"
             value={`${tendenciaPct > 0 ? '+' : ''}${Math.round(tendenciaPct)}%`}
@@ -144,6 +174,7 @@ export const InsightsSection = ({ quinceналData = [], necesidadData = [], cat
         )}
 
         <Stat
+          {...statProps}
           icon={Zap}
           label="Ticket promedio"
           value={fmt(ticketPromedio)}

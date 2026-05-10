@@ -162,7 +162,7 @@ export const DashboardPage = () => {
             </div>
           </section>
 
-          {/* ══ CATEGORÍAS + DONUT ════════════════════════════════════════════ */}
+          {/* ══ CATEGORÍAS + DONUT + INDICADORES ════════════════════════════ */}
           <section>
             <SectionLabel tag={activePeriodLabel}>Distribución por Categoría</SectionLabel>
             <div className="grid-cat">
@@ -170,25 +170,23 @@ export const DashboardPage = () => {
                 ? <Safe><CategoryTable data={categoryData} /></Safe>
                 : <EmptyState message="Sin categorías en este período" />
               }
-              {donutData.length > 0
-                ? <Safe><DonutChart data={donutData} /></Safe>
-                : <EmptyState message="Sin gastos para mostrar distribución" />
-              }
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {donutData.length > 0
+                  ? <Safe><DonutChart data={donutData} /></Safe>
+                  : <EmptyState message="Sin gastos para mostrar distribución" />
+                }
+                <Safe>
+                  <InsightsSection
+                    quinceналData={quinceналData}
+                    necesidadData={data?.necesidadData     || []}
+                    categoryData={data?.categoryData       || []}
+                    summary={data?.summary                 || {}}
+                    allTransactions={data?.allTransactions || []}
+                    vertical
+                  />
+                </Safe>
+              </div>
             </div>
-          </section>
-
-          {/* ══ INDICADORES DE CONSUMO ════════════════════════════════════════ */}
-          <section>
-            <SectionLabel>Indicadores de Consumo</SectionLabel>
-            <Safe>
-              <InsightsSection
-                quinceналData={quinceналData}
-                necesidadData={data?.necesidadData     || []}
-                categoryData={data?.categoryData       || []}
-                summary={data?.summary                 || {}}
-                allTransactions={data?.allTransactions || []}
-              />
-            </Safe>
           </section>
 
           {/* ══ TRAZABILIDAD ══════════════════════════════════════════════════ */}
