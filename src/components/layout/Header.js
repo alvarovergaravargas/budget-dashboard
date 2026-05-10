@@ -1,10 +1,11 @@
 import React from 'react';
-import { RefreshCw, Sheet, AlertCircle, LayoutDashboard, CalendarRange } from 'lucide-react';
+import { RefreshCw, Sheet, AlertCircle, LayoutDashboard, CalendarRange, Receipt } from 'lucide-react';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 
 const NAV_TABS = [
-  { id: 'dashboard', label: 'Dashboard',     icon: LayoutDashboard },
-  { id: 'planner',   label: 'Planificador',  icon: CalendarRange   },
+  { id: 'dashboard', label: 'Dashboard',    icon: LayoutDashboard },
+  { id: 'planner',   label: 'Planificador', icon: CalendarRange   },
+  { id: 'expenses',  label: 'Facturas',     icon: Receipt         },
 ];
 
 export const Header = ({ lastSync, isDemo, onRefresh, loading, activePage, onNavigate }) => {
