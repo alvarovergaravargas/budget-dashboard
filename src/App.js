@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './index.css';
 import DashboardPage from './pages/DashboardPage';
+import BudgetPlannerPage from './pages/BudgetPlannerPage';
 
 function App() {
-  return <DashboardPage />;
+  const [page, setPage] = useState('dashboard');
+
+  if (page === 'planner') {
+    return <BudgetPlannerPage onNavigate={setPage} />;
+  }
+  return <DashboardPage onNavigate={setPage} />;
 }
 
 export default App;

@@ -1,8 +1,13 @@
 import React from 'react';
-import { RefreshCw, Sheet, AlertCircle } from 'lucide-react';
+import { RefreshCw, Sheet, AlertCircle, LayoutDashboard, CalendarRange } from 'lucide-react';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 
-export const Header = ({ lastSync, isDemo, onRefresh, loading }) => {
+const NAV_TABS = [
+  { id: 'dashboard', label: 'Dashboard',     icon: LayoutDashboard },
+  { id: 'planner',   label: 'Planificador',  icon: CalendarRange   },
+];
+
+export const Header = ({ lastSync, isDemo, onRefresh, loading, activePage, onNavigate }) => {
   const { isMobile } = useBreakpoint();
 
   return (
@@ -24,6 +29,33 @@ export const Header = ({ lastSync, isDemo, onRefresh, loading }) => {
           {!isMobile && <div style={{ fontFamily:'var(--font-body)', fontSize:11, color:'var(--text-muted)' }}>Dashboard Financiero</div>}
         </div>
       </div>
+
+      {/* Nav tabs (shown when navigation is available) */}
+      {onNavigate && (
+        <nav style={{ display:'flex', gap:4, flexShrink:0 }}>
+          {NAV_TABS.map(({ id, label, icon: Icon }) => {
+            const active = activePage === id;
+            return (
+              <button
+                key={id}
+                onClick={() => onNavigate(id)}
+                style={{
+                  display:'flex', alignItems:'center', gap:6,
+                  padding: isMobile ? '7px 10px' : '7px 14px',
+                  borderRadius:9, border:'none', cursor:'pointer',
+                  background: active ? 'rgba(0,229,160,0.12)' : 'transparent',
+                  color: active ? 'var(--accent)' : 'var(--text-muted)',
+                  fontFamily:'var(--font-body)', fontSize:13,
+                  fontWeight: active ? 600 : 400, transition:'all 0.15s',
+                }}
+              >
+                <Icon size={14} />
+                {!isMobile && label}
+              </button>
+            );
+          })}
+        </nav>
+      )}
 
       {/* Right controls */}
       <div style={{ display:'flex', alignItems:'center', gap: isMobile ? 8 : 12, flexShrink:0 }}>

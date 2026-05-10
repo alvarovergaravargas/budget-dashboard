@@ -50,7 +50,7 @@ class ChartErrorBoundary extends React.Component {
 
 const Safe = ({ children }) => <ChartErrorBoundary>{children}</ChartErrorBoundary>;
 
-export const DashboardPage = () => {
+export const DashboardPage = ({ onNavigate }) => {
   const { data, loading, error, isDemo, lastSync, refresh } = useDashboard();
   const [period, setPeriod] = useState({ type: 'all' });
 
@@ -82,7 +82,7 @@ export const DashboardPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
-      <Header lastSync={lastSync} isDemo={isDemo} onRefresh={refresh} loading={loading} />
+      <Header lastSync={lastSync} isDemo={isDemo} onRefresh={refresh} loading={loading} activePage="dashboard" onNavigate={onNavigate} />
 
       {loading && <LoadingSkeleton />}
       {error   && <ErrorState message={error} onRetry={refresh} />}
