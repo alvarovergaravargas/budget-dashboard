@@ -20,7 +20,7 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 export const EstablecimientoChart = ({ data = [] }) => {
-  const { isMobile, isTablet } = useBreakpoint();
+  const { isMobile } = useBreakpoint();
   if (!data || data.length === 0) return null;
 
   const yAxisWidth  = isMobile ? 80 : 100;
