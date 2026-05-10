@@ -310,19 +310,19 @@ const SetupGuide = () => (
       background: 'var(--bg-panel)', border: '1px solid var(--border)',
       fontFamily: 'var(--font-mono)', fontSize: 11, color: '#7ee8b5',
       overflowX: 'auto', lineHeight: 1.7,
-    }}>{`function doPost(e) {
+    }}>{`function doGet(e) {
   try {
-    const d = JSON.parse(e.postData.contents);
+    const p = e.parameter;
     const sheet = SpreadsheetApp
       .getActiveSpreadsheet()
       .getSheetByName('Presupuesto');
     sheet.appendRow([
-      d.quincena,
-      d.periodo,
-      d.año,
-      d.categoria,
-      Number(d.monto),
-      d.descripcion || ''
+      p.quincena,
+      p.periodo,
+      p.año,
+      p.categoria,
+      Number(p.monto),
+      p.descripcion || ''
     ]);
     return ContentService
       .createTextOutput(JSON.stringify({ ok: true }))

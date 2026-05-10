@@ -7,21 +7,27 @@ export const hasWriteAccess = () => Boolean(APPS_SCRIPT_URL);
  * Uses no-cors mode (fire-and-forget) — response is opaque but the row is written.
  *
  * Required Apps Script (see planner setup guide in BudgetPlannerPage):
- *   function doPost(e) {
- *     const d = JSON.parse(e.postData.contents);
+ *   function doGet(e) {
+ *     const p = e.parameter;
  *     SpreadsheetApp.getActiveSpreadsheet()
  *       .getSheetByName('Presupuesto')
- *       .appendRow([d.quincena, d.periodo, d.año, d.categoria, Number(d.monto), d.descripcion || '']);
+ *       .appendRow([p.quincena, p.periodo, p.año, p.categoria, Number(p.monto), p.descripcion || '']);
  *     return ContentService.createTextOutput(JSON.stringify({ ok: true }))
  *       .setMimeType(ContentService.MimeType.JSON);
  *   }
  */
 export const writeBudgetRow = async ({ quincena, periodo, año, categoria, monto, descripcion }) => {
   if (!APPS_SCRIPT_URL) throw new Error('REACT_APP_APPS_SCRIPT_URL no configurada');
-  await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: JSON.stringify({ quincena, periodo, año, categoria, monto, descripcion: descripcion || '' }),
+  // Use GET + URL params: POST bodies are lost when Apps Script redirects (302).
+  // A GET request is a "simple" CORS request — no preflight, no body loss on redirect.
+  const params = new URLSearchParams({
+    quincena,
+    periodo,
+    año,
+    categoria,
+    monto:       String(monto),
+    descripcion: descripcion || '',
   });
-  // no-cors: response.type === 'opaque', assumed success if fetch doesn't throw
+  await fetch(`${APPS_SCRIPT_URL}?${params}`, { mode: 'no-cors' });
+  // no-cors: response is opaque — assumed success if fetch doesn't throw
 };
