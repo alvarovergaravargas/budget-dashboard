@@ -9,9 +9,10 @@ export const hasWriteAccess = () => Boolean(APPS_SCRIPT_URL);
  * Required Apps Script (see planner setup guide in BudgetPlannerPage):
  *   function doGet(e) {
  *     const p = e.parameter;
+ *     // A:Quincena | B:Fecha | C:# | D:Año | E:Categoria | F:Presupuesto (USD) | G:Comentario
  *     SpreadsheetApp.getActiveSpreadsheet()
  *       .getSheetByName('Presupuesto')
- *       .appendRow([p.quincena, p.periodo, p.año, p.categoria, Number(p.monto), p.descripcion || '']);
+ *       .appendRow([p.quincena, p.periodo, '', p.año, p.categoria, Number(p.monto), p.descripcion || '']);
  *     return ContentService.createTextOutput(JSON.stringify({ ok: true }))
  *       .setMimeType(ContentService.MimeType.JSON);
  *   }

@@ -228,7 +228,7 @@ const QuincenaPanel = ({ quincena, existing, pending, categories, onAdd, onDelet
             <EntryRow
               key={i}
               categoria={b._categoria}
-              descripcion={b['Descripcion'] || b['Descripción'] || ''}
+              descripcion={b['Comentario'] || b['Descripcion'] || b['Descripción'] || ''}
               monto={b._presupuesto}
             />
           ))}
@@ -316,13 +316,15 @@ const SetupGuide = () => (
     const sheet = SpreadsheetApp
       .getActiveSpreadsheet()
       .getSheetByName('Presupuesto');
+    // Columnas: A:Quincena | B:Fecha | C:# | D:Año | E:Categoria | F:Presupuesto (USD) | G:Comentario
     sheet.appendRow([
-      p.quincena,
-      p.periodo,
-      p.año,
-      p.categoria,
-      Number(p.monto),
-      p.descripcion || ''
+      p.quincena,         // A: Quincena
+      p.periodo,          // B: Fecha
+      '',                 // C: # (vacío)
+      p.año,              // D: Año
+      p.categoria,        // E: Categoria
+      Number(p.monto),    // F: Presupuesto (USD)
+      p.descripcion || '' // G: Comentario
     ]);
     return ContentService
       .createTextOutput(JSON.stringify({ ok: true }))
