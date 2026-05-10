@@ -342,7 +342,7 @@ const SetupGuide = () => (
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export const BudgetPlannerPage = ({ onNavigate }) => {
-  const { data, loading, error, isDemo, lastSync, refresh } = useDashboard();
+  const { data, loading, isDemo, lastSync, refresh } = useDashboard();
   const { isMobile } = useBreakpoint();
 
   const thisYear = new Date().getFullYear();
